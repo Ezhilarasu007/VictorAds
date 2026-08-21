@@ -9,11 +9,8 @@ import {
   Wallet, 
   ArrowRight, 
   ShieldCheck, 
-  Award, 
   Gift, 
-  Users, 
-  CheckCircle2, 
-  Layers
+  CheckCircle2
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -51,7 +48,7 @@ export default function HomePage() {
                 lineHeight: '1.6',
                 marginBottom: '32px'
               }}>
-                Earn up to 100 GB/day (or sell bulk 1 TB packages for ₹25,000!). Collect 70% revenue share directly into cash balance or VictorCoins, and redeem Amazon, Flipkart, or Google Play vouchers instantly.
+                Monetize up to 100 GB/day at optimal enterprise node yield rates. Collect 70% revenue share directly into cash balance or VictorCoins, and redeem Amazon, Flipkart, or Google Play vouchers instantly.
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
@@ -66,10 +63,10 @@ export default function HomePage() {
               {/* Guarantees */}
               <div style={{ display: 'flex', gap: '20px', marginTop: '32px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ShieldCheck size={16} color="var(--neon-green)" /> 70% Earner Revenue Payout
+                  <ShieldCheck size={16} color="var(--neon-green)" /> 70% Earner Revenue Share
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircle2 size={16} color="var(--neon-cyan)" /> Daily Limit 100 GB
+                  <CheckCircle2 size={16} color="var(--neon-cyan)" /> Daily Cap 100 GB
                 </span>
               </div>
             </div>

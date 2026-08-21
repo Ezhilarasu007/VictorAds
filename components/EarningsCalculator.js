@@ -7,11 +7,11 @@ export default function EarningsCalculator() {
   const [dailyDataGB, setDailyDataGB] = useState(50);
   const [isTbScale, setIsTbScale] = useState(false);
 
-  // Rate calculations:
-  // ₹4.00 average per rewarded ad
-  // ₹250.00 per GB (100 GB = ₹25,000 per day; 1 TB = ₹25,000 bulk package!)
+  // Dynamic Profitable Rate Yields:
+  // ₹4.00 average earner share per rewarded ad
+  // ₹15.00 per GB High-Yield Enterprise Rate (70% earner share)
   const adRate = 4.00;
-  const dataRatePerGB = 250.00;
+  const dataRatePerGB = 15.00;
 
   const activeGB = isTbScale ? 1000 : dailyDataGB;
 
@@ -39,9 +39,9 @@ export default function EarningsCalculator() {
             <Calculator size={24} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.4rem', color: '#ffffff' }}>Earnings Calculator (GB & TB Node Scale)</h3>
+            <h3 style={{ fontSize: '1.4rem', color: '#ffffff' }}>Profitable Node Yield Calculator</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-              Calculate real daily, monthly, and bulk TB marketplace yields.
+              Estimate daily, monthly, and bulk terabyte marketplace earnings (70% Earner Share).
             </p>
           </div>
         </div>
@@ -128,8 +128,8 @@ export default function EarningsCalculator() {
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px' }}>
               <span>0 GB (₹0)</span>
-              <span>50 GB (₹12,500)</span>
-              <span>100 GB (₹25,000)</span>
+              <span>50 GB (₹750)</span>
+              <span>100 GB (₹1,500)</span>
             </div>
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function EarningsCalculator() {
           </div>
 
           <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textAlign: 'center' }}>
-            *Calculated at standard rate of ₹4.00/ad and ₹250/GB (₹25,000 per TB).
+            *Calculated at high-yield profitable rate of ₹4.00/ad and ₹15.00/GB (70% Earner Share).
           </div>
         </div>
       </div>

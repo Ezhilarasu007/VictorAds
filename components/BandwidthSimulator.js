@@ -27,10 +27,10 @@ export default function BandwidthSimulator({ onBalanceUpdated }) {
         const speed = Math.floor(60 + Math.random() * 70);
         setCurrentSpeed(speed);
 
-        // MB added per 2s tick (~ 1.5 MB to 3.5 MB)
+        // MB added per tick (~ 1.5 MB to 3.5 MB)
         const mbAdded = Math.round((speed * 0.025) * 100) / 100;
-        // Reward: ₹0.25 per MB (1 GB = ₹250.00)
-        const rewardAdded = Math.round((mbAdded * 0.25) * 100) / 100;
+        // Profitable Rate: ₹0.025 per MB (₹25.60 per GB Shared gross -> 70% earner share)
+        const rewardAdded = Math.round((mbAdded * 0.025) * 100) / 100;
 
         try {
           mockDB.addEarnings(rewardAdded, mbAdded, 0);
@@ -40,7 +40,7 @@ export default function BandwidthSimulator({ onBalanceUpdated }) {
           if (onBalanceUpdated) onBalanceUpdated();
         } catch (err) {
           setActive(false);
-          setErrorMsg(err.message || 'Daily 100 GB limit reached!');
+          setErrorMsg(err.message || 'Daily 100 GB cap reached!');
         }
       }, 2000);
     } else {
@@ -51,7 +51,6 @@ export default function BandwidthSimulator({ onBalanceUpdated }) {
   }, [active, onBalanceUpdated]);
 
   const todayGB = user ? (user.todaySharedMB / 1024).toFixed(2) : '0.00';
-  const dailyCapGB = 100; // 100 GB Limit
   const percentUsed = user ? Math.min(100, (user.todaySharedMB / user.dailyCapMB) * 100) : 0;
 
   return (
@@ -74,15 +73,15 @@ export default function BandwidthSimulator({ onBalanceUpdated }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <h3 style={{ fontSize: '1.3rem', color: '#ffffff' }}>Bandwidth Monetization Engine</h3>
-              <span className="badge badge-cyan" style={{ fontSize: '0.68rem' }}>Daily Limit: 100 GB</span>
+              <span className="badge badge-cyan" style={{ fontSize: '0.68rem' }}>Daily Cap: 100 GB</span>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '2px' }}>
-              Rate: ₹0.25 per MB (₹250 per GB Shared) | Max 100 GB/day
+              High-Yield Dynamic Node Route (70% Earner Revenue Share)
             </p>
           </div>
         </div>
 
-        {/* Start / Stop Toggle */}
+        {/* Toggle */}
         <button
           onClick={() => { setErrorMsg(''); setActive(!active); }}
           className={active ? 'btn-green' : 'btn-secondary'}
@@ -168,7 +167,7 @@ export default function BandwidthSimulator({ onBalanceUpdated }) {
 
       <div style={{ marginTop: '16px', fontSize: '0.78rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '6px' }}>
         <ShieldCheck size={14} color="var(--neon-green)" />
-        Encrypted P2P Proxy Channel. 100% Isolated from local files.
+        Encrypted P2P Proxy Channel. 100% Isolated from local device files.
       </div>
     </div>
   );
