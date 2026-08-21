@@ -1,6 +1,7 @@
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import CustomerSupportChat from '@/components/CustomerSupportChat';
 
 export const metadata = {
   title: 'VictorADS | 3D Watch & Earn Station & 100+ Free Digital Utilities',
@@ -74,6 +75,7 @@ export default function RootLayout({ children }) {
           <main style={{ flex: 1 }}>
             {children}
           </main>
+          <CustomerSupportChat />
           <Footer />
         </div>
       </body>
