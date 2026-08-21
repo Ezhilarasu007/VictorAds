@@ -40,11 +40,11 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Home', icon: Zap },
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard', label: 'Earning Station', icon: LayoutDashboard },
     { href: '/vouchers', label: 'Redeem Hub', icon: Gift },
-    { href: '/how-to-use', label: 'How to Use', icon: HelpCircle },
-    { href: '/tools', label: 'Tools', icon: Wrench },
-    { href: '/withdraw', label: 'Cashier', icon: Wallet },
+    { href: '/how-to-use', label: 'Guide', icon: HelpCircle },
+    { href: '/tools', label: '100+ Tools', icon: Wrench },
+    { href: '/withdraw', label: 'Cashier 24/7', icon: Wallet },
     { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
     { href: '/donate', label: 'Donate', icon: Heart },
     { href: '/subscriptions', label: 'VIP', icon: Crown },
@@ -57,7 +57,7 @@ export default function Navbar() {
       position: 'sticky',
       top: 0,
       zIndex: 900,
-      background: 'rgba(7, 9, 19, 0.85)',
+      background: 'rgba(3, 7, 18, 0.9)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
       borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
@@ -71,29 +71,29 @@ export default function Navbar() {
         {/* Brand Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #00f2fe 0%, #7f00ff 100%)',
+            width: '42px',
+            height: '42px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 15px rgba(0,242,254,0.4)'
+            boxShadow: '0 0 20px rgba(16,185,129,0.4)'
           }}>
-            <Zap size={22} color="#ffffff" />
+            <Zap size={24} color="#ffffff" />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{
               fontFamily: 'var(--font-heading)',
-              fontWeight: 800,
-              fontSize: '1.4rem',
+              fontWeight: 900,
+              fontSize: '1.45rem',
               letterSpacing: '-0.03em',
               color: '#ffffff'
             }}>
-              Victor<span className="gradient-text-cyan">ADS</span>
+              Victor<span className="gradient-text-emerald">ADS</span>
             </span>
-            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
-              70% EARNER SHARE
+            <span style={{ fontSize: '0.62rem', color: 'var(--emerald-primary)', letterSpacing: '0.06em', fontWeight: 700 }}>
+              MYV3/MONEYGAIN STATION
             </span>
           </div>
         </Link>
@@ -115,9 +115,9 @@ export default function Navbar() {
                   borderRadius: '8px',
                   fontSize: '0.82rem',
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? 'var(--neon-cyan)' : 'var(--text-muted)',
-                  background: isActive ? 'rgba(0, 242, 254, 0.08)' : 'transparent',
-                  border: isActive ? '1px solid rgba(0, 242, 254, 0.25)' : '1px solid transparent',
+                  color: isActive ? 'var(--emerald-primary)' : 'var(--text-muted)',
+                  background: isActive ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
+                  border: isActive ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
                   transition: 'all 0.2s ease'
                 }}
               >
@@ -136,9 +136,9 @@ export default function Navbar() {
             gap: '6px',
             padding: '6px 12px',
             borderRadius: '9999px',
-            background: 'rgba(0, 242, 254, 0.1)',
-            border: '1px solid rgba(0, 242, 254, 0.3)',
-            color: 'var(--neon-cyan)',
+            background: 'rgba(245, 158, 11, 0.12)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            color: 'var(--gold-accent)',
             fontWeight: 700,
             fontSize: '0.82rem'
           }}>
@@ -150,13 +150,13 @@ export default function Navbar() {
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '6px 12px',
+            padding: '6px 14px',
             borderRadius: '9999px',
-            background: 'rgba(0, 255, 135, 0.1)',
-            border: '1px solid rgba(0, 255, 135, 0.3)',
-            color: 'var(--neon-green)',
-            fontWeight: 700,
-            fontSize: '0.85rem'
+            background: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid rgba(16, 185, 129, 0.35)',
+            color: 'var(--emerald-primary)',
+            fontWeight: 800,
+            fontSize: '0.88rem'
           }}>
             <span>₹{balance.toFixed(2)}</span>
           </Link>
@@ -182,7 +182,7 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       {mobileOpen && (
         <div style={{
-          background: 'rgba(10, 15, 30, 0.98)',
+          background: 'rgba(3, 7, 18, 0.98)',
           borderBottom: '1px solid var(--glass-border-glow)',
           padding: '16px 24px',
           display: 'flex',
@@ -203,8 +203,8 @@ export default function Navbar() {
                   gap: '12px',
                   padding: '12px',
                   borderRadius: '8px',
-                  color: isActive ? 'var(--neon-cyan)' : 'var(--text-muted)',
-                  background: isActive ? 'rgba(0, 242, 254, 0.1)' : 'transparent'
+                  color: isActive ? 'var(--emerald-primary)' : 'var(--text-muted)',
+                  background: isActive ? 'rgba(16, 185, 129, 0.12)' : 'transparent'
                 }}
               >
                 <Icon size={18} />

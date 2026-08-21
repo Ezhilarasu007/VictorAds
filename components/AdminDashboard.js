@@ -2,515 +2,264 @@
 import { useState, useEffect } from 'react';
 import { mockDB } from '@/lib/mockDB';
 import { 
-  ShieldAlert, 
-  Lock, 
-  Unlock, 
-  BarChart3, 
+  ShieldCheck, 
   Wallet, 
-  Megaphone, 
-  ShoppingBag, 
-  Shield, 
+  TrendingUp, 
+  Tv, 
   Users, 
-  Plus, 
+  AlertTriangle, 
   CheckCircle2, 
-  XCircle, 
+  PlusCircle, 
   Trash2, 
-  AlertTriangle,
-  RefreshCw,
-  Sliders
+  Lock,
+  Coins
 } from 'lucide-react';
 
-export default function AdminDashboard({ onLogout }) {
-  const [activeTab, setActiveTab] = useState('analytics');
+export default function AdminDashboard() {
+  const [pin, setPin] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
+  const [lockoutTime, setLockoutTime] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // DB States
-  const [user, setUser] = useState(null);
-  const [withdrawals, setWithdrawals] = useState([]);
-  const [ads, setAds] = useState([]);
-  const [marketplace, setMarketplace] = useState([]);
-  const [donations, setDonations] = useState([]);
   const [firewall, setFirewall] = useState(null);
+  const [user, setUser] = useState(null);
+  const [ads, setAds] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [donations, setDonations] = useState([]);
 
-  // Form inputs
-  const [newAdTitle, setNewAdTitle] = useState('');
-  const [newAdSponsor, setNewAdSponsor] = useState('');
-  const [newAdReward, setNewAdReward] = useState('2.50');
-  const [blockIpInput, setBlockIpInput] = useState('');
-  const [customBalanceInput, setCustomBalanceInput] = useState('');
+  // New Ad Form State
+  const [adTitle, setAdTitle] = useState('');
+  const [adSponsor, setAdSponsor] = useState('');
+  const [adReward, setAdReward] = useState('5.00');
 
-  const refreshData = () => {
-    setUser(mockDB.getUser());
-    setWithdrawals(mockDB.getWithdrawals());
-    setAds(mockDB.getAds());
-    setMarketplace(mockDB.getMarketplace());
-    setDonations(mockDB.getDonations());
+  const refreshAdminData = () => {
     setFirewall(mockDB.getFirewall());
+    setUser(mockDB.getUser());
+    setAds(mockDB.getAds());
+    setWithdrawals(mockDB.getWithdrawals());
+    setDonations(mockDB.getDonations());
   };
 
   useEffect(() => {
-    refreshData();
-  }, []);
+    if (authenticated) {
+      refreshAdminData();
+    }
+  }, [authenticated]);
 
-  // Handlers
-  const handleApproveWithdrawal = (txId) => {
-    mockDB.updateWithdrawalStatus(txId, 'Completed');
-    refreshData();
-  };
-
-  const handleRejectWithdrawal = (txId) => {
-    mockDB.updateWithdrawalStatus(txId, 'Rejected');
-    refreshData();
-  };
-
-  const handleCreateAd = (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    if (!newAdTitle || !newAdSponsor) return;
-    mockDB.addAd({ title: newAdTitle, sponsor: newAdSponsor, reward: newAdReward });
-    setNewAdTitle('');
-    setNewAdSponsor('');
-    refreshData();
+    setErrorMsg('');
+
+    if (attempts >= 5) {
+      setErrorMsg('Too many failed PIN attempts. Locked out for security.');
+      return;
+    }
+
+    if (pin === '20032004') {
+      setAuthenticated(true);
+      setAttempts(0);
+    } else {
+      const nextAtt = attempts + 1;
+      setAttempts(nextAtt);
+      setErrorMsg(`Invalid Admin PIN! Attempt ${nextAtt}/5`);
+      if (nextAtt >= 5) {
+        mockDB.updateFirewall({ failedAdminAttempts: 5 });
+      }
+    }
+  };
+
+  const handleAddAd = (e) => {
+    e.preventDefault();
+    if (!adTitle.trim()) return;
+    mockDB.addAd({ title: adTitle, sponsor: adSponsor, reward: adReward });
+    setAdTitle('');
+    setAdSponsor('');
+    refreshAdminData();
   };
 
   const handleToggleAd = (adId) => {
     mockDB.toggleAdStatus(adId);
-    refreshData();
+    refreshAdminData();
   };
 
   const handleRemoveAd = (adId) => {
     mockDB.removeAd(adId);
-    refreshData();
+    refreshAdminData();
   };
 
-  const handleRemoveListing = (pkgId) => {
-    mockDB.removeMarketplaceListing(pkgId);
-    refreshData();
+  const handleApprovePayout = (txId) => {
+    mockDB.updateWithdrawalStatus(txId, 'Approved (Admin Verified)');
+    refreshAdminData();
   };
 
-  const handleVerifyDonation = (donId) => {
-    mockDB.verifyDonation(donId);
-    refreshData();
+  const handleWithdrawAdminCommission = () => {
+    if (!firewall || firewall.adminCommissionPool <= 0) return;
+    alert(`Successfully transferred ₹${firewall.adminCommissionPool.toFixed(2)} 30% Admin Commission to Admin Bank VPA!`);
+    mockDB.updateFirewall({ adminCommissionPool: 0.00 });
+    refreshAdminData();
   };
 
-  const handleBlockIp = (e) => {
-    e.preventDefault();
-    if (!blockIpInput) return;
-    mockDB.blockIP(blockIpInput);
-    setBlockIpInput('');
-    refreshData();
-  };
-
-  const handleUnblockIp = (ip) => {
-    mockDB.unblockIP(ip);
-    refreshData();
-  };
-
-  const handleSetCustomBalance = (e) => {
-    e.preventDefault();
-    const val = parseFloat(customBalanceInput);
-    if (!isNaN(val)) {
-      mockDB.updateUser({ balance: val });
-      setCustomBalanceInput('');
-      refreshData();
-    }
-  };
-
-  if (!user || !firewall) return <div style={{ color: '#ffffff', padding: '40px' }}>Loading Admin Console...</div>;
-
-  const totalWithdrawalAmount = withdrawals.reduce((acc, w) => acc + (w.status === 'Completed' ? w.amount : 0), 0);
-  const totalDonationAmount = donations.reduce((acc, d) => acc + d.amount, 0);
-
-  return (
-    <div style={{ paddingBottom: '60px' }}>
-      {/* Admin Top Header */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '32px',
-        background: 'rgba(10, 15, 30, 0.8)',
-        border: '1px solid var(--glass-border-glow)',
-        borderRadius: '16px',
-        padding: '20px 28px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+  if (!authenticated) {
+    return (
+      <div className="glass-card" style={{ maxWidth: '450px', margin: '40px auto', padding: '32px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
-            width: '46px',
-            height: '46px',
-            borderRadius: '12px',
-            background: 'rgba(255, 77, 77, 0.15)',
-            border: '1px solid #ff4d4d',
+            width: '54px',
+            height: '54px',
+            borderRadius: '16px',
+            background: 'rgba(245, 158, 11, 0.12)',
+            border: '1px solid var(--gold-accent)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ff4d4d'
+            color: 'var(--gold-accent)',
+            margin: '0 auto 12px auto'
           }}>
-            <ShieldAlert size={26} />
+            <Lock size={28} />
           </div>
+          <h2 style={{ fontSize: '1.5rem', color: '#ffffff' }}>Admin Security Gate</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px' }}>
+            Enter official Security PIN to manage 30% Admin Vault & Payouts
+          </p>
+        </div>
+
+        {errorMsg && (
+          <div style={{ background: 'rgba(255,77,77,0.12)', border: '1px solid #ff4d4d', color: '#ff4d4d', padding: '10px', borderRadius: '8px', fontSize: '0.82rem', marginBottom: '16px' }}>
+            {errorMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <input
+            type="password"
+            placeholder="Enter 8-Digit Security PIN..."
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            className="form-input"
+            maxLength={10}
+            required
+          />
+
+          <button type="submit" className="btn-primary" style={{ justifyContent: 'center' }}>
+            Unlock Admin Console
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      {/* 30% Admin Vault Header Summary */}
+      <div className="glass-card" style={{ padding: '28px', border: '1px solid var(--emerald-primary)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '20px' }}>
           <div>
-            <div className="badge badge-pink" style={{ marginBottom: '4px' }}>ROOT ACCESS LEVEL 0</div>
-            <h2 style={{ fontSize: '1.5rem', color: '#ffffff' }}>VictorADS Administrative Console</h2>
+            <div className="badge badge-gold" style={{ marginBottom: '6px' }}>
+              <Coins size={14} /> 30% Platform Survival Pool
+            </div>
+            <h2 style={{ fontSize: '1.8rem', color: '#ffffff' }}>Admin Earnings Vault</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+              Auto-accumulated 30% platform commissions from user ad views and data node yields.
+            </p>
           </div>
+
+          <button onClick={handleWithdrawAdminCommission} className="btn-primary" style={{ padding: '12px 24px' }}>
+            <Wallet size={18} /> Withdraw 30% Admin Vault (₹{firewall?.adminCommissionPool.toFixed(2)})
+          </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
-          <button onClick={refreshData} className="btn-secondary" style={{ padding: '8px 14px', fontSize: '0.82rem' }}>
-            <RefreshCw size={14} /> Refresh Logs
-          </button>
-          <button onClick={onLogout} className="btn-danger" style={{ padding: '8px 16px', fontSize: '0.82rem' }}>
-            <Lock size={14} /> End Admin Session
-          </button>
+        <div className="grid-3">
+          <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '12px' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Admin Commission Pool</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--emerald-primary)', fontFamily: 'var(--font-heading)', marginTop: '2px' }}>
+              ₹{firewall?.adminCommissionPool.toFixed(2)}
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '16px', borderRadius: '12px' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Active Sponsor Ads</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--gold-accent)', fontFamily: 'var(--font-heading)', marginTop: '2px' }}>
+              {ads.length} Ad Units
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(6, 186, 212, 0.1)', padding: '16px', borderRadius: '12px' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total Neutralized Threats</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--cyan-accent)', fontFamily: 'var(--font-heading)', marginTop: '2px' }}>
+              {firewall?.threatsNeutralized} Attacks
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Tabs Navigation */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '10px',
-        marginBottom: '32px',
-        borderBottom: '1px solid var(--glass-border)',
-        paddingBottom: '12px'
-      }}>
-        {[
-          { id: 'analytics', label: 'Platform Analysis', icon: BarChart3 },
-          { id: 'withdrawals', label: 'Withdrawal Cashier', icon: Wallet, count: withdrawals.filter(w => w.status.includes('Pending')).length },
-          { id: 'ads', label: 'Ads & Sponsor Control', icon: Megaphone, count: ads.filter(a => a.reported).length },
-          { id: 'marketplace', label: 'Marketplace Trades', icon: ShoppingBag },
-          { id: 'firewall', label: 'Firewall & Security', icon: Shield },
-          { id: 'users', label: 'User Customization', icon: Sliders }
-        ].map(tab => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 18px',
-                borderRadius: '10px',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                border: isActive ? '1px solid var(--neon-cyan)' : '1px solid var(--glass-border)',
-                background: isActive ? 'rgba(0, 242, 254, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-                color: isActive ? 'var(--neon-cyan)' : 'var(--text-muted)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Icon size={16} />
-              {tab.label}
-              {tab.count > 0 && (
-                <span style={{
-                  background: '#ff4d4d',
-                  color: '#ffffff',
-                  borderRadius: '9999px',
-                  padding: '2px 8px',
-                  fontSize: '0.7rem',
-                  fontWeight: 800
-                }}>
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Sponsor Ads Manager */}
+      <div className="glass-card" style={{ padding: '28px' }}>
+        <h3 style={{ fontSize: '1.3rem', color: '#ffffff', marginBottom: '16px' }}>Manage Sponsor Video Ads</h3>
+        
+        {/* Create New Ad Form */}
+        <form onSubmit={handleAddAd} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+          <input
+            type="text"
+            placeholder="Ad Title (e.g. MyV3 Premium Sponsor)"
+            value={adTitle}
+            onChange={(e) => setAdTitle(e.target.value)}
+            className="form-input"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Sponsor Name"
+            value={adSponsor}
+            onChange={(e) => setAdSponsor(e.target.value)}
+            className="form-input"
+          />
+          <input
+            type="number"
+            step="0.5"
+            placeholder="Reward (e.g. 5.00)"
+            value={adReward}
+            onChange={(e) => setAdReward(e.target.value)}
+            className="form-input"
+            required
+          />
+          <button type="submit" className="btn-primary">
+            <PlusCircle size={16} /> Add Ad Unit
+          </button>
+        </form>
 
-      {/* TAB 1: Platform Analytics */}
-      {activeTab === 'analytics' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
-            <div className="glass-card" style={{ padding: '20px' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Active User Wallet</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--neon-green)', fontFamily: 'var(--font-heading)', marginTop: '4px' }}>
-                ₹{user.balance.toFixed(2)}
-              </div>
-            </div>
-            <div className="glass-card" style={{ padding: '20px' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total Bandwidth Shared</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--neon-cyan)', fontFamily: 'var(--font-heading)', marginTop: '4px' }}>
-                {(user.dataSharedMB / 1024).toFixed(2)} GB
-              </div>
-            </div>
-            <div className="glass-card" style={{ padding: '20px' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Completed Payouts Paid</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-heading)', marginTop: '4px' }}>
-                ₹{totalWithdrawalAmount.toFixed(2)}
-              </div>
-            </div>
-            <div className="glass-card" style={{ padding: '20px' }}>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Verified Donations Pool</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--neon-pink)', fontFamily: 'var(--font-heading)', marginTop: '4px' }}>
-                ₹{totalDonationAmount.toFixed(2)}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: Withdrawal Cashier */}
-      {activeTab === 'withdrawals' && (
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <h3 style={{ fontSize: '1.2rem', color: '#ffffff', marginBottom: '16px' }}>Payout Verification Queue</h3>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-muted)', textAlign: 'left' }}>
-                  <th style={{ padding: '12px' }}>Tx ID</th>
-                  <th style={{ padding: '12px' }}>Method</th>
-                  <th style={{ padding: '12px' }}>Amount</th>
-                  <th style={{ padding: '12px' }}>Destination</th>
-                  <th style={{ padding: '12px' }}>Status</th>
-                  <th style={{ padding: '12px' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {withdrawals.map(w => (
-                  <tr key={w.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '12px', color: 'var(--neon-cyan)' }}>{w.id}</td>
-                    <td style={{ padding: '12px', color: '#ffffff' }}>{w.method}</td>
-                    <td style={{ padding: '12px', fontWeight: 700, color: 'var(--neon-green)' }}>₹{w.amount}</td>
-                    <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{w.address}</td>
-                    <td style={{ padding: '12px' }}>
-                      <span className={`badge ${w.status === 'Completed' ? 'badge-green' : (w.status === 'Rejected' ? 'badge-pink' : 'badge-gold')}`}>
-                        {w.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      {w.status.includes('Pending') && (
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button onClick={() => handleApproveWithdrawal(w.id)} className="btn-green" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>
-                            <CheckCircle2 size={14} /> Approve
-                          </button>
-                          <button onClick={() => handleRejectWithdrawal(w.id)} className="btn-danger" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>
-                            <XCircle size={14} /> Reject
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: Ads & Sponsor Control */}
-      {activeTab === 'ads' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Create Ad */}
-          <div className="glass-card" style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '1.2rem', color: '#ffffff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Plus size={18} color="var(--neon-cyan)" /> Create Sponsor Ad Campaign
-            </h3>
-            <form onSubmit={handleCreateAd} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
-              <input
-                type="text"
-                placeholder="Ad Title (e.g. NeoCloud Host)"
-                value={newAdTitle}
-                onChange={(e) => setNewAdTitle(e.target.value)}
-                className="form-input"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Sponsor Name"
-                value={newAdSponsor}
-                onChange={(e) => setNewAdSponsor(e.target.value)}
-                className="form-input"
-                required
-              />
-              <input
-                type="number"
-                step="0.1"
-                placeholder="Reward Amount (₹)"
-                value={newAdReward}
-                onChange={(e) => setNewAdReward(e.target.value)}
-                className="form-input"
-                required
-              />
-              <button type="submit" className="btn-primary" style={{ height: '100%', justifyContent: 'center' }}>
-                Deploy Ad Campaign
-              </button>
-            </form>
-          </div>
-
-          {/* Manage Ads List */}
-          <div className="glass-card" style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '1.2rem', color: '#ffffff', marginBottom: '16px' }}>Active & Reported Ads Registry</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {ads.map(a => (
-                <div key={a.id} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: a.reported ? '1px solid #ff4d4d' : '1px solid var(--glass-border)',
-                  padding: '14px 18px',
-                  borderRadius: '10px'
-                }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontWeight: 700, color: '#ffffff' }}>{a.title}</span>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>By {a.sponsor}</span>
-                      {a.reported && (
-                        <span className="badge badge-pink" style={{ fontSize: '0.65rem' }}>
-                          <AlertTriangle size={12} /> REPORTED BY USER
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginTop: '4px' }}>
-                      Reward: ₹{a.reward} | Total Views: {a.views}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <button
-                      onClick={() => handleToggleAd(a.id)}
-                      className={a.active ? 'btn-secondary' : 'btn-green'}
-                      style={{ padding: '6px 12px', fontSize: '0.75rem' }}
-                    >
-                      {a.active ? 'Disable' : 'Enable'}
-                    </button>
-                    <button
-                      onClick={() => handleRemoveAd(a.id)}
-                      className="btn-danger"
-                      style={{ padding: '6px 12px', fontSize: '0.75rem' }}
-                    >
-                      <Trash2 size={14} /> Remove
-                    </button>
-                  </div>
+        {/* Existing Ads List */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {ads.map(ad => (
+            <div key={ad.id} style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid var(--glass-border)',
+              padding: '14px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <span style={{ fontWeight: 700, color: '#ffffff' }}>{ad.title}</span>
+                <span className="badge badge-green" style={{ marginLeft: '10px', fontSize: '0.7rem' }}>₹{ad.reward} Gross</span>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Views: {ad.views} | Unit: {ad.unitId}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+              </div>
 
-      {/* TAB 4: Data Marketplace Trades */}
-      {activeTab === 'marketplace' && (
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <h3 style={{ fontSize: '1.2rem', color: '#ffffff', marginBottom: '16px' }}>Manage P2P Marketplace Listings</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {marketplace.map(m => (
-              <div key={m.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                background: 'rgba(255,255,255,0.03)',
-                padding: '14px',
-                borderRadius: '10px',
-                border: '1px solid var(--glass-border)'
-              }}>
-                <div>
-                  <span style={{ color: 'var(--neon-cyan)', fontWeight: 700 }}>{m.seller}</span>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginLeft: '10px' }}>
-                    {m.amountMB} MB @ ₹{m.pricePerMB}/MB (Total: ₹{m.totalCost})
-                  </span>
-                </div>
-                <button onClick={() => handleRemoveListing(m.id)} className="btn-danger" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>
-                  <Trash2 size={14} /> Delete Listing
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={() => handleToggleAd(ad.id)} className="btn-secondary" style={{ fontSize: '0.78rem' }}>
+                  {ad.active ? 'Disable' : 'Enable'}
+                </button>
+                <button onClick={() => handleRemoveAd(ad.id)} style={{ background: 'rgba(255,77,77,0.12)', border: '1px solid #ff4d4d', color: '#ff4d4d', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer' }}>
+                  <Trash2 size={14} />
                 </button>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 5: Firewall & Security */}
-      {activeTab === 'firewall' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div className="glass-card" style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '1.2rem', color: '#ffffff', marginBottom: '16px' }}>Firewall & DDoS Shield Control</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '10px' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>DDoS Shield Status</span>
-                <div style={{ color: 'var(--neon-green)', fontWeight: 700, fontSize: '1.1rem', marginTop: '2px' }}>
-                  ACTIVE (120 req/min)
-                </div>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '10px' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Threat Scans Completed</span>
-                <div style={{ color: 'var(--neon-cyan)', fontWeight: 700, fontSize: '1.1rem', marginTop: '2px' }}>
-                  {firewall.totalScans} Requests
-                </div>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '10px' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Threats Neutralized</span>
-                <div style={{ color: 'var(--neon-pink)', fontWeight: 700, fontSize: '1.1rem', marginTop: '2px' }}>
-                  {firewall.threatsNeutralized} Attacks
-                </div>
-              </div>
             </div>
-
-            {/* Block IP Form */}
-            <form onSubmit={handleBlockIp} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-              <input
-                type="text"
-                placeholder="Enter IP Address to Block (e.g. 192.168.1.50)"
-                value={blockIpInput}
-                onChange={(e) => setBlockIpInput(e.target.value)}
-                className="form-input"
-                required
-              />
-              <button type="submit" className="btn-danger" style={{ flexShrink: 0 }}>
-                Block IP Address
-              </button>
-            </form>
-
-            <h4 style={{ color: '#ffffff', fontSize: '0.95rem', marginBottom: '10px' }}>Blocked IP Blacklist</h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {firewall.blockedIPs.map(ip => (
-                <div key={ip} style={{
-                  background: 'rgba(255, 77, 77, 0.12)',
-                  border: '1px solid rgba(255, 77, 77, 0.3)',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '0.82rem',
-                  color: '#ff4d4d'
-                }}>
-                  <code>{ip}</code>
-                  <button onClick={() => handleUnblockIp(ip)} style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer' }}>
-                    <XCircle size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
-      )}
-
-      {/* TAB 6: User Balance Customization */}
-      {activeTab === 'users' && (
-        <div className="glass-card" style={{ padding: '24px', maxWidth: '600px' }}>
-          <h3 style={{ fontSize: '1.2rem', color: '#ffffff', marginBottom: '16px' }}>Override User Wallet Balance</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>
-            Set active user wallet balance for testing payouts or administrative adjustments.
-          </p>
-          <form onSubmit={handleSetCustomBalance} style={{ display: 'flex', gap: '10px' }}>
-            <input
-              type="number"
-              step="0.01"
-              placeholder="Enter new wallet balance (₹)"
-              value={customBalanceInput}
-              onChange={(e) => setCustomBalanceInput(e.target.value)}
-              className="form-input"
-              required
-            />
-            <button type="submit" className="btn-green" style={{ flexShrink: 0 }}>
-              Update Wallet
-            </button>
-          </form>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

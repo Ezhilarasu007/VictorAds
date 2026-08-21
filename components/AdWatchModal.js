@@ -1,81 +1,70 @@
 'use client';
 import { useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
 import { mockDB } from '@/lib/mockDB';
-import { Play, CheckCircle2, AlertTriangle, ShieldCheck, X } from 'lucide-react';
+import { Play, CheckCircle2, AlertTriangle, ShieldCheck, X, Tv } from 'lucide-react';
 
 export default function AdWatchModal({ ad, onClose, onRewardClaimed }) {
   const [timeLeft, setTimeLeft] = useState(15);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [completed, setCompleted] = useState(false);
   const [reported, setReported] = useState(false);
 
   useEffect(() => {
-    if (timeLeft > 0 && !isCompleted) {
-      const timer = setTimeout(() => {
+    if (timeLeft > 0) {
+      const timer = setInterval(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !isCompleted) {
-      setIsCompleted(true);
-      // Fire celebration confetti
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.6 }
-        });
-      } catch (e) {}
-
-      // Record reward in DB
-      mockDB.recordAdView(ad.id);
-      if (onRewardClaimed) onRewardClaimed(2.50);
+      return () => clearInterval(timer);
+    } else {
+      setCompleted(true);
     }
-  }, [timeLeft, isCompleted, ad.id, onRewardClaimed]);
+  }, [timeLeft]);
+
+  const handleClaim = () => {
+    try {
+      mockDB.recordAdView(ad.id);
+      if (onRewardClaimed) onRewardClaimed();
+      onClose();
+    } catch (err) {
+      alert(err.message || 'Failed to credit ad rewards.');
+    }
+  };
 
   const handleReport = () => {
-    mockDB.reportAd(ad.id);
     setReported(true);
   };
 
-  const progressPercent = ((15 - timeLeft) / 15) * 100;
-
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '550px' }}>
-        <button
-          onClick={onClose}
-          disabled={!isCompleted && timeLeft > 0}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-muted)',
-            cursor: (!isCompleted && timeLeft > 0) ? 'not-allowed' : 'pointer',
-            opacity: (!isCompleted && timeLeft > 0) ? 0.4 : 1
-          }}
-        >
-          <X size={20} />
-        </button>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <div className="badge badge-cyan">
-            <ShieldCheck size={14} /> Rewarded Ad Sponsor
+      <div className="modal-content" style={{ maxWidth: '540px' }}>
+        {/* Top Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div className="badge badge-green">
+            <Tv size={14} /> MyV3 / AdMob Rewarded Ad Stream
           </div>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{ad.sponsor}</span>
+          <button
+            onClick={onClose}
+            disabled={!completed}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: completed ? 'var(--text-main)' : 'var(--text-dim)',
+              cursor: completed ? 'pointer' : 'not-allowed'
+            }}
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        <h3 style={{ fontSize: '1.4rem', color: '#ffffff', marginBottom: '8px' }}>{ad.title}</h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '20px' }}>
-          Watch full 15-second sponsor showcase to credit ₹2.50 directly to your VictorADS wallet balance.
+        <h2 style={{ fontSize: '1.4rem', color: '#ffffff', marginBottom: '4px' }}>{ad.title}</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>
+          Sponsor: {ad.sponsor} | Unit ID: <code>{ad.unitId}</code>
         </p>
 
-        {/* Video Player Frame Simulation */}
+        {/* Video Canvas Simulation Container */}
         <div style={{
-          background: '#04060f',
+          background: '#030712',
           border: '1px solid var(--glass-border-glow)',
-          borderRadius: '12px',
+          borderRadius: '16px',
           height: '240px',
           display: 'flex',
           flexDirection: 'column',
@@ -85,39 +74,44 @@ export default function AdWatchModal({ ad, onClose, onRewardClaimed }) {
           overflow: 'hidden',
           marginBottom: '20px'
         }}>
-          {isCompleted ? (
+          {completed ? (
             <div style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease' }}>
-              <CheckCircle2 size={48} color="var(--neon-green)" style={{ margin: '0 auto 12px auto' }} />
-              <h4 style={{ fontSize: '1.3rem', color: '#ffffff' }}>Reward Earned: +₹2.50</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Added to your wallet balance instantly.</p>
+              <CheckCircle2 size={54} color="var(--emerald-primary)" style={{ margin: '0 auto 12px auto' }} />
+              <h3 style={{ fontSize: '1.4rem', color: '#ffffff' }}>Ad Completed!</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '4px' }}>
+                Reward: ₹3.50 Cash + 35 VictorCoins (70% Earner Share)
+              </p>
+              <p style={{ color: 'var(--gold-accent)', fontSize: '0.78rem', marginTop: '2px' }}>
+                ₹1.50 (30%) routed to Admin Survival Vault
+              </p>
             </div>
           ) : (
             <>
               <div style={{
-                width: '60px',
-                height: '60px',
+                width: '64px',
+                height: '64px',
                 borderRadius: '50%',
-                background: 'rgba(0, 242, 254, 0.15)',
-                border: '1px solid var(--neon-cyan)',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid var(--emerald-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--neon-cyan)',
+                color: 'var(--emerald-primary)',
                 marginBottom: '14px',
-                animation: 'pulseGlow 2s infinite'
+                animation: 'pulse 1.5s infinite'
               }}>
-                <Play size={28} />
+                <Play size={32} />
               </div>
-              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '2rem', color: '#ffffff' }}>
+              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: '2.4rem', color: '#ffffff' }}>
                 00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
               </div>
-              <div style={{ color: 'var(--neon-cyan)', fontSize: '0.8rem', marginTop: '4px' }}>
-                Simulating Video Stream...
+              <div style={{ color: 'var(--emerald-primary)', fontSize: '0.82rem', marginTop: '4px' }}>
+                Watching Sponsor Video... Do not close window.
               </div>
             </>
           )}
 
-          {/* Progress Bar */}
+          {/* Progress Bar at bottom */}
           <div style={{
             position: 'absolute',
             bottom: 0,
@@ -128,43 +122,41 @@ export default function AdWatchModal({ ad, onClose, onRewardClaimed }) {
           }}>
             <div style={{
               height: '100%',
-              width: `${progressPercent}%`,
-              background: 'linear-gradient(90deg, #00f2fe 0%, #00ff87 100%)',
+              width: `${((15 - timeLeft) / 15) * 100}%`,
+              background: 'linear-gradient(90deg, #10b981 0%, #06b6d4 100%)',
               transition: 'width 1s linear'
             }} />
           </div>
         </div>
 
-        {/* Footer Controls */}
+        {/* Footer Actions */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {reported ? (
-            <span style={{ fontSize: '0.8rem', color: 'var(--neon-pink)' }}>Ad Reported to Admin</span>
-          ) : (
-            <button
-              onClick={handleReport}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-dim)',
-                cursor: 'pointer',
-                fontSize: '0.78rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <AlertTriangle size={14} /> Report Ad Campaign
-            </button>
-          )}
+          <button
+            onClick={handleReport}
+            disabled={reported}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: reported ? 'var(--text-dim)' : '#ff4d4d',
+              fontSize: '0.78rem',
+              cursor: reported ? 'default' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <AlertTriangle size={14} />
+            {reported ? 'Ad Reported to AdSense Policy Team' : 'Report Fraudulent Ad'}
+          </button>
 
-          {isCompleted ? (
-            <button onClick={onClose} className="btn-green">
-              Claim & Close
+          {completed ? (
+            <button onClick={handleClaim} className="btn-primary" style={{ padding: '10px 24px' }}>
+              Claim ₹3.50 + 35 Coins
             </button>
           ) : (
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Must wait {timeLeft}s to claim
-            </span>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+              Wait {timeLeft}s to Claim
+            </div>
           )}
         </div>
       </div>
