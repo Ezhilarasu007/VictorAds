@@ -11,6 +11,7 @@ import {
   ShoppingBag, 
   Heart, 
   Crown, 
+  Gift,
   Users, 
   BookOpen, 
   HelpCircle,
@@ -22,23 +23,26 @@ import {
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [balance, setBalance] = useState(642.50);
+  const [balance, setBalance] = useState(0.00);
+  const [coins, setCoins] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const updateBalance = () => {
+    const updateUserData = () => {
       const u = mockDB.getUser();
       setBalance(u.balance);
+      setCoins(u.coins);
     };
 
-    updateBalance();
-    const interval = setInterval(updateBalance, 2000);
+    updateUserData();
+    const interval = setInterval(updateUserData, 2000);
     return () => clearInterval(interval);
   }, [pathname]);
 
   const navLinks = [
     { href: '/', label: 'Home', icon: Zap },
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/vouchers', label: 'Redeem Hub', icon: Gift },
     { href: '/how-to-use', label: 'How to Use', icon: HelpCircle },
     { href: '/tools', label: 'Tools', icon: Wrench },
     { href: '/withdraw', label: 'Cashier', icon: Wallet },
@@ -91,13 +95,13 @@ export default function Navbar() {
               Victor<span className="gradient-text-cyan">ADS</span>
             </span>
             <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
-              REWARDS & DATA
+              70% EARNER SHARE
             </span>
           </div>
         </Link>
 
         {/* Desktop Nav Links */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="desktop-nav">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }} className="desktop-nav">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
@@ -108,10 +112,10 @@ export default function Navbar() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 12px',
+                  gap: '5px',
+                  padding: '6px 10px',
                   borderRadius: '8px',
-                  fontSize: '0.85rem',
+                  fontSize: '0.82rem',
                   fontWeight: isActive ? 600 : 400,
                   color: isActive ? 'var(--neon-cyan)' : 'var(--text-muted)',
                   background: isActive ? 'rgba(0, 242, 254, 0.08)' : 'transparent',
@@ -119,29 +123,43 @@ export default function Navbar() {
                   transition: 'all 0.2s ease'
                 }}
               >
-                <Icon size={15} />
+                <Icon size={14} />
                 <span>{link.label}</span>
               </Link>
             );
           })}
         </div>
 
-        {/* User Balance Badge & Mobile Menu Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {/* User Balance Badges & Mobile Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Link href="/vouchers" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 12px',
+            borderRadius: '9999px',
+            background: 'rgba(0, 242, 254, 0.1)',
+            border: '1px solid rgba(0, 242, 254, 0.3)',
+            color: 'var(--neon-cyan)',
+            fontWeight: 700,
+            fontSize: '0.82rem'
+          }}>
+            <Coins size={14} />
+            <span>{coins} C</span>
+          </Link>
+
           <Link href="/withdraw" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '8px 16px',
+            gap: '6px',
+            padding: '6px 12px',
             borderRadius: '9999px',
             background: 'rgba(0, 255, 135, 0.1)',
             border: '1px solid rgba(0, 255, 135, 0.3)',
             color: 'var(--neon-green)',
             fontWeight: 700,
-            fontSize: '0.9rem',
-            boxShadow: '0 0 15px rgba(0, 255, 135, 0.15)'
+            fontSize: '0.85rem'
           }}>
-            <Coins size={16} />
             <span>₹{balance.toFixed(2)}</span>
           </Link>
 

@@ -21,18 +21,18 @@ export default function ThreeDCanvas() {
 
     window.addEventListener('resize', handleResize);
 
-    // Particle nodes setup
-    const particleCount = Math.min(Math.floor(width / 18), 70);
+    // Dynamic 3D Nodes setup
+    const particleCount = Math.min(Math.floor(width / 15), 85);
     const particles = [];
-    const colors = ['#00f2fe', '#00ff87', '#f093fb', '#4facfe'];
+    const colors = ['#00f2fe', '#00ff87', '#f093fb', '#ff9a9e'];
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
-        radius: Math.random() * 2.5 + 1.5,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: (Math.random() - 0.5) * 1.2,
+        radius: Math.random() * 3 + 1.5,
         color: colors[Math.floor(Math.random() * colors.length)],
         pulse: Math.random() * Math.PI
       });
@@ -61,51 +61,49 @@ export default function ThreeDCanvas() {
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-        // Update position
         p.x += p.vx;
         p.y += p.vy;
-        p.pulse += 0.03;
+        p.pulse += 0.04;
 
-        // Bounce on boundaries
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
-        // Mouse attraction / repulsion force
+        // Interactive mouse force
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 120) {
-          p.x -= (dx / dist) * 1.5;
-          p.y -= (dy / dist) * 1.5;
+        if (dist < 140) {
+          p.x -= (dx / dist) * 2;
+          p.y -= (dy / dist) * 2;
         }
 
-        // Draw particle node
-        const glowRadius = p.radius + Math.sin(p.pulse) * 1;
+        // Render glowing node
+        const glowRadius = p.radius + Math.sin(p.pulse) * 1.2;
         ctx.beginPath();
         ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 15;
         ctx.shadowColor = p.color;
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Draw node interconnections
+        // Draw connections
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const distance = Math.hypot(p.x - p2.x, p.y - p2.y);
-          if (distance < 140) {
-            const alpha = 1 - distance / 140;
+          if (distance < 130) {
+            const alpha = 1 - distance / 130;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(0, 242, 254, ${alpha * 0.25})`;
+            ctx.strokeStyle = `rgba(0, 242, 254, ${alpha * 0.3})`;
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Data packet pulse animation along line
-            if (Math.random() < 0.003) {
+            // Data packet pulse animation
+            if (Math.random() < 0.004) {
               ctx.beginPath();
-              ctx.arc((p.x + p2.x) / 2, (p.y + p2.y) / 2, 2, 0, Math.PI * 2);
+              ctx.arc((p.x + p2.x) / 2, (p.y + p2.y) / 2, 2.5, 0, Math.PI * 2);
               ctx.fillStyle = '#00ff87';
               ctx.fill();
             }
@@ -133,7 +131,7 @@ export default function ThreeDCanvas() {
         position: 'absolute',
         bottom: '16px',
         right: '16px',
-        background: 'rgba(10, 15, 30, 0.7)',
+        background: 'rgba(10, 15, 30, 0.8)',
         backdropFilter: 'blur(8px)',
         border: '1px solid rgba(0,242,254,0.3)',
         borderRadius: '8px',
@@ -145,7 +143,7 @@ export default function ThreeDCanvas() {
         gap: '6px'
       }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff87', display: 'inline-block' }}></span>
-        WebGL Node Visualizer Active
+        WebGL Node Engine (70% Revenue Share Active)
       </div>
     </div>
   );
