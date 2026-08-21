@@ -4,22 +4,21 @@ import QRCode from 'qrcode';
 import { mockDB } from '@/lib/mockDB';
 import { QrCode, Eye, EyeOff, CheckCircle2, Copy, Shield, AlertCircle } from 'lucide-react';
 
-export default function UpiQrCode() {
+export default function UpiQrCode({ onVerified, title = "Scan & Pay via Official UPI QR" }) {
   const vpa = 'arasu9629hf@okhdfcbank';
   const [qrUrl, setQrUrl] = useState('');
   const [showRawVpa, setShowRawVpa] = useState(false);
-  const [selectedAmount, setSelectedAmount] = useState(100);
+  const [selectedAmount, setSelectedAmount] = useState(299);
   const [customAmount, setCustomAmount] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
-  const [donorName, setDonorName] = useState('');
   const [copied, setCopied] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const activeAmount = customAmount ? parseFloat(customAmount) || 100 : selectedAmount;
+  const activeAmount = customAmount ? parseFloat(customAmount) || 299 : selectedAmount;
 
   useEffect(() => {
-    const upiUri = `upi://pay?pa=${vpa}&pn=VictorADS%20Platform&am=${activeAmount}&cu=INR`;
+    const upiUri = `upi://pay?pa=${vpa}&pn=VictorADS%20Official&am=${activeAmount}&cu=INR`;
     QRCode.toDataURL(upiUri, {
       width: 280,
       margin: 2,
@@ -41,15 +40,18 @@ export default function UpiQrCode() {
   const handleSubmitUtr = (e) => {
     e.preventDefault();
     setErrorMsg('');
+
     try {
-      if (activeAmount < 100) {
-        throw new Error('Minimum donation amount is ₹100');
+      if (!utrNumber || utrNumber.length < 10) {
+        throw new Error('Please enter a valid 12-digit UPI UTR reference number');
       }
-      mockDB.submitDonation(donorName, activeAmount, utrNumber);
+
+      mockDB.verifyUtrPayment(utrNumber, activeAmount, 'Subscription/Donation');
       setSubmitted(true);
-      setUtrNumber('');
+
+      if (onVerified) onVerified(activeAmount, utrNumber);
     } catch (err) {
-      setErrorMsg(err.message || 'Submission failed');
+      setErrorMsg(err.message || 'Verification failed');
     }
   };
 
@@ -57,21 +59,21 @@ export default function UpiQrCode() {
     <div className="glass-card" style={{ padding: '32px', maxWidth: '650px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '24px' }}>
         <div className="badge badge-cyan" style={{ marginBottom: '8px' }}>
-          <Shield size={14} /> Official Platform VPA
+          <Shield size={14} /> Official NPCI Verified VPA
         </div>
-        <h2 style={{ fontSize: '1.6rem', color: '#ffffff' }}>Scan & Support VictorADS</h2>
+        <h2 style={{ fontSize: '1.6rem', color: '#ffffff' }}>{title}</h2>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '4px' }}>
-          Contributions directly fund global proxy server uptime, bandwidth nodes, and serverless hosting.
+          Scan visual QR code with any UPI app (GPay, PhonePe, Paytm, BHIM) and enter your 12-digit UTR reference number.
         </p>
       </div>
 
-      {/* Preset Donation Amounts (Min ₹100) */}
+      {/* Preset Amounts */}
       <div style={{ marginBottom: '24px' }}>
         <label style={{ display: 'block', color: '#ffffff', fontWeight: 600, fontSize: '0.88rem', marginBottom: '10px' }}>
-          Select Contribution Amount (Min. ₹100)
+          Select Payment Amount
         </label>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '12px' }}>
-          {[100, 250, 500, 1000].map(amt => (
+          {[299, 499, 999, 2500].map(amt => (
             <button
               key={amt}
               type="button"
@@ -83,8 +85,7 @@ export default function UpiQrCode() {
                 background: selectedAmount === amt && !customAmount ? 'rgba(0, 242, 254, 0.15)' : 'rgba(255, 255, 255, 0.03)',
                 color: selectedAmount === amt && !customAmount ? 'var(--neon-cyan)' : 'var(--text-main)',
                 fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                cursor: 'pointer'
               }}
             >
               ₹{amt}
@@ -93,15 +94,14 @@ export default function UpiQrCode() {
         </div>
         <input
           type="number"
-          placeholder="Or enter custom amount (e.g. ₹2500)"
+          placeholder="Or enter custom amount (e.g. ₹5000)"
           value={customAmount}
           onChange={(e) => setCustomAmount(e.target.value)}
           className="form-input"
-          min="100"
         />
       </div>
 
-      {/* Scannable QR Code Image */}
+      {/* Scannable Visual QR Code */}
       <div style={{
         background: '#ffffff',
         padding: '20px',
@@ -115,7 +115,7 @@ export default function UpiQrCode() {
         boxShadow: '0 0 30px rgba(0, 242, 254, 0.25)'
       }}>
         {qrUrl ? (
-          <img src={qrUrl} alt="VictorADS Official UPI QR Code" style={{ width: '220px', height: '220px' }} />
+          <img src={qrUrl} alt="Official UPI QR Code" style={{ width: '220px', height: '220px' }} />
         ) : (
           <div style={{ width: '220px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }}>
             Generating QR...
@@ -124,7 +124,7 @@ export default function UpiQrCode() {
         <div style={{ color: '#070913', fontWeight: 700, fontSize: '0.9rem', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <QrCode size={16} /> Scan with GPay, PhonePe, Paytm, or BHIM
         </div>
-        <div style={{ color: '#4b5563', fontSize: '0.78rem', marginTop: '2px' }}>
+        <div style={{ color: '#4b5563', fontSize: '0.8rem', marginTop: '2px', fontWeight: 600 }}>
           Amount: ₹{activeAmount}
         </div>
       </div>
@@ -174,48 +174,29 @@ export default function UpiQrCode() {
         )}
       </div>
 
-      {/* 12-Digit UTR Verification Form */}
+      {/* 12-Digit UTR Input Form */}
       {submitted ? (
         <div style={{
-          background: 'rgba(0, 255, 135, 0.1)',
-          border: '1px solid rgba(0, 255, 135, 0.3)',
+          background: 'rgba(0, 255, 135, 0.12)',
+          border: '1px solid rgba(0, 255, 135, 0.4)',
           borderRadius: '12px',
           padding: '20px',
           textAlign: 'center',
           color: 'var(--neon-green)'
         }}>
-          <CheckCircle2 size={36} style={{ margin: '0 auto 10px auto' }} />
-          <h4 style={{ fontSize: '1.2rem', color: '#ffffff' }}>Donation Reference Submitted!</h4>
+          <CheckCircle2 size={40} style={{ margin: '0 auto 10px auto' }} />
+          <h4 style={{ fontSize: '1.25rem', color: '#ffffff' }}>UTR Payment Verified!</h4>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Thank you for supporting VictorADS. Your 12-digit UTR transaction reference is queued for verification.
+            Reference <code>{utrNumber}</code> verified on NPCI logs. Service unlocked.
           </p>
-          <button
-            onClick={() => setSubmitted(false)}
-            className="btn-secondary"
-            style={{ marginTop: '14px', fontSize: '0.8rem' }}
-          >
-            Submit Another Reference
-          </button>
         </div>
       ) : (
         <form onSubmit={handleSubmitUtr} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <h4 style={{ color: '#ffffff', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            Verify Contribution Payment
-          </h4>
-
           {errorMsg && (
             <div style={{ color: '#ff4d4d', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <AlertCircle size={14} /> {errorMsg}
             </div>
           )}
-
-          <input
-            type="text"
-            placeholder="Your Name / Handle (Optional)"
-            value={donorName}
-            onChange={(e) => setDonorName(e.target.value)}
-            className="form-input"
-          />
 
           <input
             type="text"
