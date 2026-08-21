@@ -65,12 +65,13 @@ export default function Footer() {
             <h4 style={{ color: '#ffffff', marginBottom: '16px', fontFamily: 'var(--font-heading)' }}>Platform Hubs</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <li><Link href="/dashboard" style={{ transition: 'color 0.2s' }}>Earning Station</Link></li>
+              <li><Link href="/vouchers" style={{ transition: 'color 0.2s' }}>Redeem Gift Cards Hub</Link></li>
+              <li><Link href="/how-to-use" style={{ transition: 'color 0.2s' }}>How to Use Guide</Link></li>
               <li><Link href="/tools" style={{ transition: 'color 0.2s' }}>Utility Tools (PDF, QR, Analyzer)</Link></li>
               <li><Link href="/withdraw" style={{ transition: 'color 0.2s' }}>Cashier & Payout Ledger</Link></li>
               <li><Link href="/marketplace" style={{ transition: 'color 0.2s' }}>P2P Data Marketplace</Link></li>
               <li><Link href="/donate" style={{ transition: 'color 0.2s' }}>Platform Donations (UPI QR)</Link></li>
               <li><Link href="/subscriptions" style={{ transition: 'color 0.2s' }}>VIP Tier Memberships</Link></li>
-              <li><Link href="/articles" style={{ transition: 'color 0.2s' }}>Educational Library (25 Guides)</Link></li>
             </ul>
           </div>
 

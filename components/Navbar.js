@@ -13,7 +13,6 @@ import {
   Crown, 
   Gift,
   Users, 
-  BookOpen, 
   HelpCircle,
   Lock, 
   Menu, 
@@ -50,7 +49,6 @@ export default function Navbar() {
     { href: '/donate', label: 'Donate', icon: Heart },
     { href: '/subscriptions', label: 'VIP', icon: Crown },
     { href: '/community', label: 'Community', icon: Users },
-    { href: '/articles', label: 'Articles', icon: BookOpen },
     { href: '/admin', label: 'Admin', icon: Lock },
   ];
 
@@ -101,7 +99,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Nav Links */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }} className="desktop-nav">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="desktop-nav">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;

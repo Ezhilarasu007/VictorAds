@@ -3,7 +3,6 @@ import Link from 'next/link';
 import ThreeDCanvas from '@/components/ThreeDCanvas';
 import EarningsCalculator from '@/components/EarningsCalculator';
 import TutorialVideos from '@/components/TutorialVideos';
-import { ARTICLES } from '@/lib/articlesData';
 import { 
   Zap, 
   Wifi, 
@@ -18,8 +17,6 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
-  const featuredArticles = ARTICLES.slice(0, 3);
-
   return (
     <div>
       {/* Hero Banner Section */}
@@ -96,44 +93,6 @@ export default function HomePage() {
       <section style={{ padding: '80px 0' }}>
         <div className="container">
           <EarningsCalculator />
-        </div>
-      </section>
-
-      {/* Featured Educational Articles */}
-      <section style={{ padding: '80px 0', background: 'rgba(5, 8, 18, 0.5)' }}>
-        <div className="container">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px' }}>
-            <div>
-              <div className="badge badge-cyan" style={{ marginBottom: '8px' }}>Knowledge Base</div>
-              <h2 style={{ fontSize: '2rem', color: '#ffffff' }}>Latest Educational Guides</h2>
-            </div>
-            <Link href="/articles" className="btn-secondary" style={{ fontSize: '0.88rem' }}>
-              View All 25 Articles <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          <div className="grid-3">
-            {featuredArticles.map((art) => (
-              <div key={art.slug} className="glass-card glass-card-interactive" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <span className="badge badge-green" style={{ fontSize: '0.7rem' }}>{art.category}</span>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>{art.readTime}</span>
-                  </div>
-                  <h3 style={{ fontSize: '1.15rem', color: '#ffffff', marginBottom: '10px', lineHeight: '1.4' }}>
-                    {art.title}
-                  </h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '20px' }}>
-                    {art.summary}
-                  </p>
-                </div>
-
-                <Link href={`/articles/${art.slug}`} style={{ color: 'var(--neon-cyan)', fontWeight: 600, fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  Read Article <ArrowRight size={14} />
-                </Link>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
     </div>
