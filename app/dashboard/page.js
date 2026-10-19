@@ -3,6 +3,7 @@ import { mockDB } from '@/lib/mockDB';
 import BandwidthSimulator from '@/components/BandwidthSimulator';
 import AdWatchModal from '@/components/AdWatchModal';
 import AdMobIntegrationHub, { AdMobBanner } from '@/components/AdMobComponents';
+import UserProfileSection from '@/components/UserProfileSection';
 import Link from 'next/link';
 import { 
   Tv, 
@@ -39,7 +40,7 @@ export default function DashboardPage() {
       {/* Header Banner */}
       <div style={{ marginBottom: '32px' }}>
         <div className="badge badge-green" style={{ marginBottom: '8px' }}>
-          <Zap size={14} /> MyV3 & MoneyGain Earning Console
+          <Zap size={14} /> VictorADS Earning Console
         </div>
         <h1 style={{ fontSize: '2.2rem', color: '#ffffff' }}>User Earning Station</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '4px' }}>
@@ -102,11 +103,11 @@ export default function DashboardPage() {
         <AdMobIntegrationHub onBalanceUpdated={refreshUserData} />
       </div>
 
-      {/* MyV3 / MoneyGain Rewarded Sponsor Video Ads Grid */}
+      {/* Rewarded Sponsor Video Ads Grid */}
       <div className="glass-card" style={{ padding: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
           <div>
-            <div className="badge badge-gold" style={{ marginBottom: '6px' }}>MyV3 Video Stream</div>
+            <div className="badge badge-gold" style={{ marginBottom: '6px' }}>Sponsor Video Stream</div>
             <h2 style={{ fontSize: '1.5rem', color: '#ffffff' }}>Watch Rewarded Sponsor Ads</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
               Watch 15-second sponsor video ads. Earn ₹3.50 Cash + 35 VictorCoins per view (70% Share)!
@@ -138,6 +139,11 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* User Profile & Activity Audit Logs Section */}
+      <div style={{ marginTop: '40px' }}>
+        <UserProfileSection onProfileUpdated={refreshUserData} />
       </div>
 
       {/* Anchored Banner Fixed at Bottom */}

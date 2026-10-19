@@ -31,7 +31,7 @@ export default function HomePage() {
             {/* Left Copy */}
             <div>
               <div className="badge badge-green" style={{ marginBottom: '18px' }}>
-                <Zap size={14} /> MyV3 / MoneyGain Earning Architecture
+                <Zap size={14} /> VictorADS High-Yield Earning Architecture
               </div>
               
               <h1 style={{
@@ -106,7 +106,7 @@ export default function HomePage() {
               </div>
 
               <Link href="/dashboard" className="btn-secondary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.9rem' }}>
-                Open MyV3 Watch & Earn Console
+                Open Watch & Earn Console
               </Link>
             </div>
           </div>

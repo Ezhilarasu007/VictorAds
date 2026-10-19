@@ -202,7 +202,7 @@ export default function AdminDashboard() {
         <form onSubmit={handleAddAd} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
           <input
             type="text"
-            placeholder="Ad Title (e.g. MyV3 Premium Sponsor)"
+            placeholder="Ad Title (e.g. Premium Sponsor)"
             value={adTitle}
             onChange={(e) => setAdTitle(e.target.value)}
             className="form-input"

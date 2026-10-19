@@ -39,7 +39,7 @@ export default function AdWatchModal({ ad, onClose, onRewardClaimed }) {
         {/* Top Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div className="badge badge-green">
-            <Tv size={14} /> MyV3 / AdMob Rewarded Ad Stream
+            <Tv size={14} /> Google AdMob Rewarded Ad Stream
           </div>
           <button
             onClick={onClose}

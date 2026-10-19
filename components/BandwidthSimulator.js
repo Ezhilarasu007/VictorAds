@@ -87,7 +87,7 @@ export default function BandwidthSimulator({ onBalanceUpdated }) {
           }
         } catch (err) {
           setActive(false);
-          setErrorMsg(err.message || 'Daily 100 GB cap reached!');
+          setErrorMsg(err.message || 'Daily 10 GB cap reached!');
         }
       }, 1500);
     } else {
@@ -99,7 +99,8 @@ export default function BandwidthSimulator({ onBalanceUpdated }) {
 
   const sessionMB = (sessionKB / 1024).toFixed(3);
   const todayGB = user ? (user.todaySharedMB / 1024).toFixed(3) : '0.000';
-  const percentUsed = user ? Math.min(100, (user.todaySharedMB / user.dailyCapMB) * 100) : 0;
+  const dailyCapGB = user ? (user.dailyCapMB / 1024).toFixed(0) : '10';
+  const percentUsed = user ? Math.min(100, (user.todaySharedMB / (user.dailyCapMB || 10240)) * 100) : 0;
 
   return (
     <div className="glass-card" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
@@ -232,11 +233,11 @@ export default function BandwidthSimulator({ onBalanceUpdated }) {
         </div>
       </div>
 
-      {/* Progress towards 100 GB cap */}
+      {/* Progress towards 10 GB daily max cap */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
           <span>Today's Real Shared Volume: <strong>{todayGB} GB</strong></span>
-          <span>Daily Limit: <strong>100 GB</strong></span>
+          <span>Daily Max Cap: <strong>{dailyCapGB} GB Max</strong></span>
         </div>
         <div style={{ height: '8px', width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
           <div style={{ height: '100%', width: `${percentUsed}%`, background: 'linear-gradient(90deg, #00f2fe 0%, #00ff87 100%)', transition: 'width 0.5s ease' }} />

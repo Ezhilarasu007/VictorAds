@@ -93,7 +93,7 @@ export default function Navbar() {
               Victor<span className="gradient-text-emerald">ADS</span>
             </span>
             <span style={{ fontSize: '0.62rem', color: 'var(--emerald-primary)', letterSpacing: '0.06em', fontWeight: 700 }}>
-              MYV3/MONEYGAIN STATION
+              EARNING & UTILITY PLATFORM
             </span>
           </div>
         </Link>
