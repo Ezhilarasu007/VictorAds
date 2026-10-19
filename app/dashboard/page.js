@@ -1,8 +1,8 @@
-'use client';
 import { useState, useEffect } from 'react';
 import { mockDB } from '@/lib/mockDB';
 import BandwidthSimulator from '@/components/BandwidthSimulator';
 import AdWatchModal from '@/components/AdWatchModal';
+import AdMobIntegrationHub, { AdMobBanner } from '@/components/AdMobComponents';
 import Link from 'next/link';
 import { 
   Tv, 
@@ -97,6 +97,11 @@ export default function DashboardPage() {
         <BandwidthSimulator onBalanceUpdated={refreshUserData} />
       </div>
 
+      {/* Official Google AdMob Integration Hub */}
+      <div style={{ marginBottom: '40px' }}>
+        <AdMobIntegrationHub onBalanceUpdated={refreshUserData} />
+      </div>
+
       {/* MyV3 / MoneyGain Rewarded Sponsor Video Ads Grid */}
       <div className="glass-card" style={{ padding: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
@@ -123,7 +128,7 @@ export default function DashboardPage() {
                 </div>
                 <h3 style={{ fontSize: '1.1rem', color: '#ffffff', marginBottom: '6px' }}>{ad.title}</h3>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                  Sponsor: {ad.sponsor} | Unit: {ad.unitId}
+                  Sponsor: {ad.sponsor} | Format: {ad.format || 'Rewarded Video'} | Unit: {ad.unitId}
                 </p>
               </div>
 
@@ -134,6 +139,9 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Anchored Banner Fixed at Bottom */}
+      <AdMobBanner type="ANCHORED_ADAPTIVE_BANNER" onReward={refreshUserData} />
 
       {/* Ad Watch Modal */}
       {activeAd && (

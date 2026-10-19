@@ -1,7 +1,7 @@
-'use client';
 import { useState, useEffect } from 'react';
 import { mockDB } from '@/lib/mockDB';
-import { 
+import { ADMOB_UNITS } from '@/lib/admobConfig';
+import {
   ShieldCheck, 
   Wallet, 
   TrendingUp, 
@@ -12,7 +12,8 @@ import {
   PlusCircle, 
   Trash2, 
   Lock,
-  Coins
+  Coins,
+  Copy
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -243,8 +244,9 @@ export default function AdminDashboard() {
               <div>
                 <span style={{ fontWeight: 700, color: '#ffffff' }}>{ad.title}</span>
                 <span className="badge badge-green" style={{ marginLeft: '10px', fontSize: '0.7rem' }}>₹{ad.reward} Gross</span>
+                {ad.format && <span className="badge badge-cyan" style={{ marginLeft: '6px', fontSize: '0.68rem' }}>{ad.format}</span>}
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Views: {ad.views} | Unit: {ad.unitId}
+                  Views: {ad.views} | Unit: <code>{ad.unitId}</code>
                 </div>
               </div>
 
@@ -258,6 +260,51 @@ export default function AdminDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Official AdMob Demo Unit IDs Reference Matrix */}
+      <div className="glass-card" style={{ padding: '28px', border: '1px solid var(--cyan-accent)' }}>
+        <div className="badge badge-cyan" style={{ marginBottom: '6px' }}>
+          <Tv size={14} /> Official Google AdMob Integration Matrix
+        </div>
+        <h3 style={{ fontSize: '1.3rem', color: '#ffffff', marginBottom: '4px' }}>AdMob Demo Ad Unit IDs Registry</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>
+          All 10 active Google AdMob demo ad unit IDs configured for production testing and format validation.
+        </p>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-muted)' }}>
+                <th style={{ padding: '10px' }}>Ad Format</th>
+                <th style={{ padding: '10px' }}>Demo Ad Unit ID</th>
+                <th style={{ padding: '10px' }}>Est. Yield</th>
+                <th style={{ padding: '10px' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.values(ADMOB_UNITS).map((unit) => (
+                <tr key={unit.id + unit.key} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <td style={{ padding: '10px', color: '#ffffff', fontWeight: 600 }}>{unit.format}</td>
+                  <td style={{ padding: '10px', fontFamily: 'monospace', color: 'var(--cyan-accent)' }}>{unit.id}</td>
+                  <td style={{ padding: '10px', color: 'var(--emerald-primary)', fontWeight: 700 }}>₹{unit.rewardCash.toFixed(2)}</td>
+                  <td style={{ padding: '10px' }}>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(unit.id);
+                        alert(`Copied AdMob ID (${unit.format}): ${unit.id}`);
+                      }}
+                      className="btn-secondary"
+                      style={{ fontSize: '0.72rem', padding: '4px 10px' }}
+                    >
+                      <Copy size={12} /> Copy ID
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
