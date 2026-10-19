@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 import { mockDB } from '@/lib/mockDB';
 import BandwidthSimulator from '@/components/BandwidthSimulator';
